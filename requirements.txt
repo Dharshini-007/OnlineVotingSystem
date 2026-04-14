@@ -3,3 +3,4 @@ Werkzeug==3.0.3
 PyMySQL==1.1.0
 Flask-Session==0.8.0
 python-dotenv==1.0.1
+gunicorn==21.2.0
