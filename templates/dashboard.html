@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h2>Voter Dashboard</h2>
+    <p>Welcome to the secure voting portal. Review the candidates thoughtfully.</p>
+</div>
+
+{% if has_voted %}
+<div class="voted-confirmation glass-panel">
+    <div class="success-icon">✔️</div>
+    <h3>Vote Cast Successfully</h3>
+    <p>Thank you for participating! Your vote has been securely recorded in the system.</p>
+    <a href="{{ url_for('results') }}" class="btn-primary">View Current Results</a>
+</div>
+{% else %}
+<div class="candidates-grid">
+    {% if candidates %}
+        {% for candidate in candidates %}
+        <div class="candidate-card glass-panel">
+            <div class="candidate-info">
+                <h3>{{ candidate.name }}</h3>
+                <p>ID: #{{ candidate.id }}</p>
+            </div>
+            <form action="{{ url_for('vote', candidate_id=candidate.id) }}" method="POST" class="vote-form" onsubmit="return confirmVote('{{ candidate.name }}')">
+                <button type="submit" class="btn-vote">Vote for {{ candidate.name }}</button>
+            </form>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <p>No candidates available at the moment. Please check back later.</p>
+        </div>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

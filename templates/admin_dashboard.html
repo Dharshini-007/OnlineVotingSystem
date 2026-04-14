@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="dashboard-header admin-header">
+    <h2>Admin Dashboard</h2>
+    <p>Manage candidates and monitor voting statistics.</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card glass-panel">
+        <h3>Total Voters</h3>
+        <div class="stat-value">{{ total_voters }}</div>
+    </div>
+    <div class="stat-card glass-panel">
+        <h3>Total Votes Cast</h3>
+        <div class="stat-value">{{ total_votes }}</div>
+    </div>
+</div>
+
+<div class="admin-sections">
+    <div class="admin-section glass-panel">
+        <h3>Add New Candidate</h3>
+        <form action="{{ url_for('add_candidate') }}" method="POST" class="add-candidate-form">
+            <div class="form-group inline-submit">
+                <input type="text" name="name" required placeholder="Candidate Full Name" autocomplete="off">
+                <button type="submit" class="btn-primary">Add Candidate</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="admin-section glass-panel">
+        <h3>Manage Candidates</h3>
+        {% if candidates %}
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for candidate in candidates %}
+                        <tr>
+                            <td>{{ candidate.id }}</td>
+                            <td>{{ candidate.name }}</td>
+                            <td>
+                                <form action="{{ url_for('delete_candidate', id=candidate.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this candidate? All votes associated will be permanently removed.');">
+                                    <button type="submit" class="btn-danger btn-sm">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>No candidates available. Start by adding one above.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

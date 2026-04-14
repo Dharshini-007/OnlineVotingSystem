@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h2>Live Election Results</h2>
+    <p>Total Votes Cast: <strong>{{ total_votes }}</strong></p>
+</div>
+
+<div class="results-container glass-panel">
+    {% if results %}
+        {% for candidate in results %}
+        <div class="result-bar-wrapper">
+            <div class="result-info">
+                <span class="candidate-name">{{ candidate.name }}</span>
+                <span class="vote-count">{{ candidate.vote_count }} votes</span>
+            </div>
+            
+            {% set percentage = 0 %}
+            {% if total_votes > 0 %}
+                {% set percentage = (candidate.vote_count / total_votes * 100) | round(1) %}
+            {% endif %}
+            
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="--percent: {{ percentage }}%; width: var(--percent);"></div>
+            </div>
+            <div class="percentage">{{ percentage }}%</div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <p>No results available at the moment. Votes are required or candidates are missing.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
