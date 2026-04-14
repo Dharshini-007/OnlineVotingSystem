@@ -3,39 +3,36 @@ import pymysql
 import pymysql.cursors
 from dotenv import load_dotenv
 
+# Load environment variables (works locally, ignored in Render)
 load_dotenv()
 
-DB_HOST = os.environ.get("DB_HOST", "localhost")
-DB_USER = os.environ.get("DB_USER", "root")
-DB_PASSWORD = os.environ.get("DB_PASSWORD", "")
-DB_NAME = os.environ.get("DB_NAME", "online_voting")
+# Get DB credentials from environment variables
+DB_HOST = os.environ.get("DB_HOST")
+DB_USER = os.environ.get("DB_USER")
+DB_PASSWORD = os.environ.get("DB_PASSWORD")
+DB_NAME = os.environ.get("DB_NAME")
+DB_PORT = int(os.environ.get("DB_PORT", 3306))
 
-def get_db_connection(use_db=True):
-    """
-    Returns a PyMySQL database connection.
-    If use_db is False, connects without selecting a database (useful for creation).
-    """
-    db = DB_NAME if use_db else None
+
+def get_db_connection():
+    """Create and return a database connection"""
     return pymysql.connect(
         host=DB_HOST,
         user=DB_USER,
         password=DB_PASSWORD,
-        database=db,
+        database=DB_NAME,
+        port=DB_PORT,
         cursorclass=pymysql.cursors.DictCursor
     )
 
-def init_db():
-    """ Initialize the database and all required tables """
-    # 1. Connect without selecting a database to create it if it doesn't exist
-    conn = get_db_connection(use_db=False)
-    with conn.cursor() as cursor:
-        cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_NAME}")
-    conn.close()
 
-    # 2. Connect to the specified database to create tables
+def init_db():
+    """Initialize tables in the existing Railway database"""
+
     conn = get_db_connection()
     with conn.cursor() as cursor:
-        # Create users table
+
+        # USERS TABLE
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -46,8 +43,8 @@ def init_db():
                 has_voted BOOLEAN DEFAULT FALSE
             )
         """)
-        
-        # Create candidates table
+
+        # CANDIDATES TABLE
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS candidates (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -55,7 +52,7 @@ def init_db():
             )
         """)
 
-        # Create votes table
+        # VOTES TABLE
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS votes (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -67,7 +64,7 @@ def init_db():
             )
         """)
 
-        # Insert a default admin account if not exists
+        # DEFAULT ADMIN
         cursor.execute("SELECT id FROM users WHERE email='admin@voting.com'")
         if not cursor.fetchone():
             from werkzeug.security import generate_password_hash
@@ -76,11 +73,7 @@ def init_db():
                 "INSERT INTO users (name, email, password, role) VALUES (%s, %s, %s, %s)",
                 ('System Admin', 'admin@voting.com', hashed_pw, 'admin')
             )
-            
+
     conn.commit()
     conn.close()
     print("Database initialized successfully.")
-
-if __name__ == '__main__':
-    # You can run this directly to test database creation
-    init_db()
